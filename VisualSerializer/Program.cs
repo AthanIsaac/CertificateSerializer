@@ -1,20 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Word = Microsoft.Office.Interop.Word;
 
-namespace CertificateSerializer
+namespace VisualSerializer
 {
-    class Program
+    static class Program
     {
-        private static string regex = @"No.[0-9]{4}-M[0-9]*";
-        static void Main(string[] args)
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
         {
-            CreateWordDocument(@"C:\Users\copti\Downloads\Certificate of Marriage1.docx", @"C:\Users\copti\Downloads\Certificate of Marriage2.docx");
-            Console.ReadLine();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
         }
+
+        private static string regex = @"No.[0-9]{4}-M[0-9]*";
 
         private class SerialNumber
         {
@@ -30,6 +39,12 @@ namespace CertificateSerializer
             {
                 SerialNumber s = new SerialNumber(this.ToString());
                 s.id++;
+                return s;
+            }
+            public SerialNumber Increment(int n)
+            {
+                SerialNumber s = new SerialNumber(this.ToString());
+                s.id+=n;
                 return s;
             }
 
@@ -69,33 +84,33 @@ namespace CertificateSerializer
         }
 
         //Creeate the Doc Method
-        private static void CreateWordDocument(object filename, object SaveAs)
+        public static void CreateWordDocument(object filename, object SaveAs, int copies)
         {
             Word.Application wordApp = new Word.Application();
             Word.Document myWordDoc = null;
+            wordApp.Visible = false;
 
-            if (File.Exists((string)filename))
+            if (!File.Exists((string)filename))
             {
-                wordApp.Visible = false;
+                throw new IOException("File not Found!");
+            }
 
+            for (int i = 1; i <= copies; i++)
+            {
                 myWordDoc = wordApp.Documents.Open(ref filename);
 
                 myWordDoc.Activate();
 
                 //find and replace
                 SerialNumber oldNum = new SerialNumber(WhatToFind(myWordDoc));
-                FindAndReplace(wordApp, oldNum.ToString(), oldNum.Increment().ToString());
-            }
-            else
-            {
-                throw new IOException("File not found!");
-            }
+                FindAndReplace(wordApp, oldNum.ToString(), oldNum.Increment(i).ToString());
 
-            string s = myWordDoc.Content.Text;
-            //Save as
-            myWordDoc.SaveAs2(ref SaveAs);
+                //Save as
+                object name = (string)SaveAs + i;
+                myWordDoc.SaveAs2(ref name);
 
-            myWordDoc.Close();
+                myWordDoc.Close();
+            }
             wordApp.Quit();
             Console.WriteLine("Success!");
         }
@@ -105,5 +120,8 @@ namespace CertificateSerializer
             string text = myWordDoc.Content.Text;
             return Regex.Match(text, regex).ToString();
         }
+
+
+
     }
 }
