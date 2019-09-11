@@ -35,12 +35,6 @@ namespace VisualSerializer
                 id = int.Parse(serialNumber.Substring(9));
             }
 
-            public SerialNumber Increment()
-            {
-                SerialNumber s = new SerialNumber(this.ToString());
-                s.id++;
-                return s;
-            }
             public SerialNumber Increment(int n)
             {
                 SerialNumber s = new SerialNumber(this.ToString());
@@ -83,12 +77,13 @@ namespace VisualSerializer
                 ref matchControl);
         }
 
-        //Creeate the Doc Method
+        // Create the Doc Method
         public static void CreateWordDocument(object filename, object SaveAs, int copies)
         {
+            // the instance of word
             Word.Application wordApp = new Word.Application();
             Word.Document myWordDoc = null;
-            wordApp.Visible = false;
+            wordApp.Visible = true;
 
             if (!File.Exists((string)filename))
             {
@@ -97,11 +92,12 @@ namespace VisualSerializer
 
             for (int i = 1; i <= copies; i++)
             {
+                // The passed in document
                 myWordDoc = wordApp.Documents.Open(ref filename);
 
                 myWordDoc.Activate();
 
-                //find and replace
+                //find and replace ---------------------------------------------------------
                 SerialNumber oldNum = new SerialNumber(WhatToFind(myWordDoc));
                 FindAndReplace(wordApp, oldNum.ToString(), oldNum.Increment(i).ToString());
 
@@ -112,7 +108,7 @@ namespace VisualSerializer
                 myWordDoc.Close();
             }
             wordApp.Quit();
-            Console.WriteLine("Success!");
+            MessageBox.Show("Success!");
         }
 
         private static string WhatToFind(Word.Document myWordDoc)

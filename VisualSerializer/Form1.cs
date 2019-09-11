@@ -18,11 +18,6 @@ namespace VisualSerializer
 
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             if (System.Text.RegularExpressions.Regex.IsMatch(textBox3.Text, "[^0-9]"))
@@ -34,7 +29,34 @@ namespace VisualSerializer
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (textBox1.Text == "")
+            {
+                MessageBox.Show("Enter valid source path");
+            }
+            else if (textBox2.Text == "")
+            {
+                MessageBox.Show("Enter valid destination path");
+            }
+            else if (textBox3.Text == "")
+            {
+                MessageBox.Show("Enter a number of copies");
+            }
             Program.CreateWordDocument(textBox1.Text.Trim(), textBox2.Text.Trim(), int.Parse(textBox3.Text));
+            textBox3.Clear();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            textBox1.Text = textBox1.Text.Replace('\"', ' ');
+            textBox1.Text = textBox1.Text.Trim();
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            textBox2.Text = textBox2.Text.Split('.')[0];
+            textBox2.Text = textBox2.Text.Replace('\"', ' ');
+            textBox2.Text = textBox2.Text.Trim();
+            
         }
     }
 }
